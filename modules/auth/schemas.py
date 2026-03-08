@@ -10,14 +10,14 @@ class UserCreate(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def validate_password(self, password: str) -> str:
+    def validate_password(cls, password: str) -> str:
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters long")
         return password
 
     @field_validator("email")
     @classmethod
-    def validate_email(self, email: str) -> str:
+    def validate_email(cls, email: str) -> str:
         if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
             raise ValueError("Invalid email address")
         return email
@@ -31,3 +31,7 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
     updated_at: datetime
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

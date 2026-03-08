@@ -1,5 +1,11 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from modules.auth.models import User
+from core.database import AsyncSession, get_db
+from fastapi import Depends
+from sqlalchemy import select
+
+def get_user_repository(db: AsyncSession = Depends(get_db)) -> IUserRepository:
+    return UserRepository(db)
 
 class IUserRepository(ABC):
 
@@ -30,7 +36,10 @@ class UserRepository(IUserRepository):
         return user
 
     async def get_user_by_email(self, email: str) -> User:
-        return await self.db.query(User).filter(User.email == email).first()
+        result = await self.db.execute(select(User).where(User.email == email))
+        return result.scalars().first()
+
 
     async def get_user_by_id(self, id: int) -> User:
-        return await self.db.query(User).filter(User.id == id).first()        
+        result = await self.db.execute(select(User).where(User.id == id))
+        return result.scalars().first()        

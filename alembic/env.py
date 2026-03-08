@@ -3,6 +3,9 @@ from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 from core.database import Base
 
+# Import all models so they register with Base.metadata (required for autogenerate)
+from modules.auth import models as _auth_models  # noqa: F401
+
 target_metadata = Base.metadata
 DATABASE_URL = context.config.get_main_option("sqlalchemy.url")
 
