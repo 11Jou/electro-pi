@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Query
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Query
 from modules.organization.schemas import *
 from modules.organization.services import *
 from modules.organization.repository import MembershipRepository, get_membership_repository
 from modules.organization.models import Role
-from modules.auth.check_auth import get_current_user, require_org_admin
+from modules.auth.check_auth import get_current_user, require_org_admin, get_org_membership
 from modules.auth.models import User
-from modules.auth.services import AuthService, get_auth_service
+from modules.auth.services import *
 
 
 router = APIRouter(prefix="/organization", tags=["organization"])
@@ -54,3 +54,30 @@ async def search_memberships(
     membership_service: MembershipService = Depends(get_membership_service),
 ) -> List[UserMembershipResponse]:
     return await membership_service.search_memberships(organization_id=organization_id, query=query)
+
+
+@router.post("/{organization_id}/items", response_model=ItemResponse)
+async def create_item(
+    organization_id: int,
+    body: ItemCreate,
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_org_admin),
+    item_service: ItemService = Depends(get_item_service),
+) -> ItemResponse:
+    return await item_service.create_item(
+        organization_id=organization_id, item=body, user=current_user
+    )
+
+
+@router.get("/{organization_id}/items", response_model=List[ItemResponse])
+async def get_items(
+    organization_id: int,
+    membership=Depends(get_org_membership),
+    current_user: User = Depends(get_current_user),
+    item_service: ItemService = Depends(get_item_service),
+) -> List[ItemResponse]:
+    if membership.role == Role.ADMIN:
+        return await item_service.get_items(organization_id=organization_id)
+    return await item_service.get_items(
+        organization_id=organization_id, user_id=current_user.id
+    )

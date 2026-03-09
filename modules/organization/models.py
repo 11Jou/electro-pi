@@ -40,9 +40,11 @@ class Item(Base):
 
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     details = Column(JSONB, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     organization = relationship("Organization", lazy="joined", back_populates="items")
+    user = relationship("User", lazy="joined", back_populates="items")

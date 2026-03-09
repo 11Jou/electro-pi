@@ -33,3 +33,12 @@ class UserMembershipResponse(BaseModel):
     role: Role
     created_at: datetime
     updated_at: datetime
+
+
+class ItemCreate(BaseModel):
+    details: dict
+
+class ItemResponse(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: datetime

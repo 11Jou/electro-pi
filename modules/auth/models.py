@@ -14,3 +14,4 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     memberships = relationship("Membership", back_populates="user")
+    items = relationship("Item", back_populates="user")

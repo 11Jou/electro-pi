@@ -36,3 +36,17 @@ async def require_org_admin(
         raise HTTPException(status_code=403, detail="Not a member of this organization")
     if membership.role != Role.ADMIN:
         raise HTTPException(status_code=403, detail="Only organization admins can use this endpoint")
+
+
+async def get_org_membership(
+    organization_id: int,
+    current_user: User = Depends(get_current_user),
+    membership_repository: MembershipRepository = Depends(get_membership_repository),
+):
+    """Return the current user's membership in the given organization, or raise 403 if not a member."""
+    membership = await membership_repository.get_membership_by_org_and_user(
+        organization_id, current_user.id
+    )
+    if not membership:
+        raise HTTPException(status_code=403, detail="Not a member of this organization")
+    return membership

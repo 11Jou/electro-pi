@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from fastapi import Depends, HTTPException
 from modules.organization.schemas import *
 from modules.organization.repository import *
-from modules.organization.models import Organization, Membership
+from modules.organization.models import Organization, Membership, Item
+from modules.auth.models import User
 from modules.auth.services import AuthService, get_auth_service
 
 def get_organization_service(
@@ -17,6 +18,12 @@ def get_membership_service(
     auth_service: AuthService = Depends(get_auth_service),
 ) -> "MembershipService":
     return MembershipService(membership_repository, auth_service)
+
+
+def get_item_service(
+    item_repository: ItemRepository = Depends(get_item_repository),
+) -> "ItemService":
+    return ItemService(item_repository)
 
 
 class OrganizationService:
@@ -96,3 +103,33 @@ class MembershipService:
         created_at=membership.user.created_at, 
         updated_at=membership.user.updated_at) 
         for membership in memberships]
+
+class ItemService:
+    def __init__(self, item_repository: ItemRepository):
+        self.item_repository = item_repository
+
+    async def create_item(
+        self, organization_id: int, item: ItemCreate, user: User
+    ) -> ItemResponse:
+        item = Item(
+            organization_id=organization_id,
+            user_id=user.id,
+            details=item.details,
+        )
+        item = await self.item_repository.create_item(item)
+        return ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
+
+    async def get_item_by_id(self, id: int) -> ItemResponse:
+        item = await self.item_repository.get_item_by_id(id)
+        return ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
+
+    async def get_items(
+        self, organization_id: int, user_id: Optional[int] = None
+    ) -> List[ItemResponse]:
+        items = await self.item_repository.get_items(
+            organization_id, created_by_user_id=user_id
+        )
+        return [
+            ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
+            for item in items
+        ]
