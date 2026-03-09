@@ -6,8 +6,6 @@ from sqlalchemy import select
 from fastapi import Depends
 from core.database import get_db
 
-def get_organization_repository(db: AsyncSession = Depends(get_db)) -> "OrganizationRepository":
-    return OrganizationRepository(db)
 
 
 class IOrganizationRepository(ABC):
@@ -41,3 +39,8 @@ class OrganizationRepository(IOrganizationRepository):
     async def get_organization_by_id(self, id: int) -> Organization:
         result = await self.db.execute(select(Organization).where(Organization.id == id))
         return result.scalars().first()
+
+
+
+def get_organization_repository(db: AsyncSession = Depends(get_db)) -> "OrganizationRepository":
+    return OrganizationRepository(db)

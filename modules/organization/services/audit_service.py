@@ -4,10 +4,7 @@ from typing import List
 from fastapi import Depends
 
 
-def get_audit_service(
-    audit_log_repository: IAuditLogRepository = Depends(get_audit_log_repository),
-) -> "AuditService":
-    return AuditService(audit_log_repository)
+
 
 
 class AuditService:
@@ -33,3 +30,9 @@ class AuditService:
         return await self.audit_log_repository.get_audit_logs(
             organization_id, limit, offset
         )
+
+
+def get_audit_service(
+    audit_log_repository: IAuditLogRepository = Depends(get_audit_log_repository),
+) -> "AuditService":
+    return AuditService(audit_log_repository)

@@ -7,8 +7,7 @@ from typing import List
 from fastapi import Depends
 from core.database import get_db
 
-def get_item_repository(db: AsyncSession = Depends(get_db)) -> "ItemRepository":
-    return ItemRepository(db)
+
 
 class IItemRepository(ABC):
 
@@ -53,3 +52,7 @@ class ItemRepository(IItemRepository):
     async def get_item_user(self, organization_id: int, user_id: int, limit: int = 20, offset: int = 0) -> List[Item]:
         result = await self.db.execute(select(Item).where(Item.organization_id == organization_id).where(Item.user_id == user_id).limit(limit).offset(offset))
         return result.scalars().all()
+
+
+def get_item_repository(db: AsyncSession = Depends(get_db)) -> "ItemRepository":
+    return ItemRepository(db)

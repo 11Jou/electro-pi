@@ -5,13 +5,6 @@ from modules.organization.services.audit_service import AuditService, get_audit_
 from fastapi import Depends
 
 
-def get_organization_service(
-    organization_repository: IOrganizationRepository = Depends(get_organization_repository),
-    audit_service: AuditService = Depends(get_audit_service),
-) -> OrganizationService:
-    return OrganizationService(organization_repository, audit_service)
-
-
 class OrganizationService:
     def __init__(
         self,
@@ -35,3 +28,10 @@ class OrganizationService:
         organization = await self.organization_repository.get_organization_by_id(id)
         return OrganizationResponse(id=organization.id, name=organization.name, created_at=organization.created_at, updated_at=organization.updated_at)
 
+
+
+def get_organization_service(
+    organization_repository: IOrganizationRepository = Depends(get_organization_repository),
+    audit_service: AuditService = Depends(get_audit_service),
+) -> OrganizationService:
+    return OrganizationService(organization_repository, audit_service)

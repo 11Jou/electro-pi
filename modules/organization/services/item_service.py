@@ -7,12 +7,6 @@ from typing import List, Optional
 from fastapi import Depends
 
 
-def get_item_service(
-    item_repository: IItemRepository = Depends(get_item_repository),
-    audit_service: AuditService = Depends(get_audit_service),
-) -> ItemService:
-    return ItemService(item_repository, audit_service)
-
 
 class ItemService:
     def __init__(self, item_repository: IItemRepository, audit_service: AuditService):
@@ -61,3 +55,10 @@ class ItemService:
             ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
             for item in items
         ]
+
+
+def get_item_service(
+    item_repository: IItemRepository = Depends(get_item_repository),
+    audit_service: AuditService = Depends(get_audit_service),
+) -> ItemService:
+    return ItemService(item_repository, audit_service)

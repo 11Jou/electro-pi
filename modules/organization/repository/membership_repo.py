@@ -8,9 +8,6 @@ from fastapi import Depends
 from core.database import get_db
 
 
-def get_membership_repository(db: AsyncSession = Depends(get_db)) -> "MembershipRepository":
-    return MembershipRepository(db)
-
 class IMembershipRepository(ABC):
 
     def __init__(self, db: AsyncSession):
@@ -83,3 +80,6 @@ class MembershipRepository(IMembershipRepository):
             .options(selectinload(Membership.user))
         )
         return result.scalars().all()
+
+def get_membership_repository(db: AsyncSession = Depends(get_db)) -> "MembershipRepository":
+    return MembershipRepository(db)

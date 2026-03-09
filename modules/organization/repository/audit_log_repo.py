@@ -7,8 +7,7 @@ from sqlalchemy.orm import selectinload
 from fastapi import Depends
 from core.database import get_db
 
-def get_audit_log_repository(db: AsyncSession = Depends(get_db)) -> "AuditLogRepository":
-    return AuditLogRepository(db)
+
 
 class IAuditLogRepository(ABC):
 
@@ -45,3 +44,6 @@ class AuditLogRepository(IAuditLogRepository):
         return result.scalars().all()
 
         
+
+def get_audit_log_repository(db: AsyncSession = Depends(get_db)) -> "AuditLogRepository":
+    return AuditLogRepository(db)

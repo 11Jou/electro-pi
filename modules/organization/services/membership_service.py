@@ -1,19 +1,11 @@
 from modules.organization.repository import IMembershipRepository, get_membership_repository
 from modules.organization.models import Membership
-from modules.organization.schemas import MembershipCreateWithUserEmail, MembershipResponse
+from modules.organization.schemas import MembershipCreateWithUserEmail, MembershipResponse, UserMembershipResponse
 from modules.organization.services.audit_service import AuditService, get_audit_service
 from modules.auth.services import AuthService, get_auth_service
 from fastapi import HTTPException, Depends
 from typing import List
 from modules.auth.models import User
-
-
-def get_membership_service(
-    membership_repository: IMembershipRepository = Depends(get_membership_repository),
-    auth_service: AuthService = Depends(get_auth_service),
-    audit_service: AuditService = Depends(get_audit_service),
-) -> MembershipService:
-    return MembershipService(membership_repository, auth_service, audit_service)
 
 
 
@@ -67,7 +59,7 @@ class MembershipService:
         created_at=membership.created_at, 
         updated_at=membership.updated_at)
 
-    async def get_memberships(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[UserResponse]:
+    async def get_memberships(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[UserMembershipResponse]:
         memberships = await self.membership_repository.get_memberships(organization_id, limit, offset)
         return [UserMembershipResponse(
         id=membership.user_id, 
@@ -89,3 +81,11 @@ class MembershipService:
         created_at=membership.user.created_at, 
         updated_at=membership.user.updated_at) 
         for membership in memberships]
+
+
+def get_membership_service(
+    membership_repository: IMembershipRepository = Depends(get_membership_repository),
+    auth_service: AuthService = Depends(get_auth_service),
+    audit_service: AuditService = Depends(get_audit_service),
+) -> MembershipService:
+    return MembershipService(membership_repository, auth_service, audit_service)

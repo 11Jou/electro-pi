@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from modules.organization.schemas import *
 from modules.organization.services import *
 from modules.organization.repository import MembershipRepository, get_membership_repository
-from modules.organization.models import Role
+from modules.organization.models import Role, Membership
 from modules.auth.check_auth import get_current_user, require_org_admin, get_org_membership
 from modules.auth.models import User
+
 from modules.auth.services import *
 
 
