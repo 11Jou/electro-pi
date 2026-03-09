@@ -3,7 +3,7 @@ from core.database import AsyncSession
 from modules.organization.models import Item
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from typing import List, Optional
+from typing import List
 from fastapi import Depends
 from core.database import get_db
 
@@ -25,7 +25,11 @@ class IItemRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_items(self, organization_id: int, created_by_user_id: Optional[int] = None, limit: int = 20, offset: int = 0) -> List[Item]:
+    async def get_items(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[Item]:
+        pass
+
+    @abstractmethod
+    async def get_item_user(self, organization_id: int, user_id: int, limit: int = 20, offset: int = 0) -> List[Item]:
         pass
 
 
@@ -42,12 +46,10 @@ class ItemRepository(IItemRepository):
         result = await self.db.execute(select(Item).where(Item.id == id))
         return result.scalars().first()
 
-    async def get_items(
-        self, organization_id: int, created_by_user_id: Optional[int] = None,
-        limit: int = 20, offset: int = 0
-    ) -> List[Item]:
-        stmt = select(Item).where(Item.organization_id == organization_id)
-        if created_by_user_id is not None:
-            stmt = stmt.where(Item.user_id == created_by_user_id)
-        result = await self.db.execute(stmt.limit(limit).offset(offset))
-        return list(result.scalars().all())
+    async def get_items(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[Item]:
+        result = await self.db.execute(select(Item).where(Item.organization_id == organization_id).limit(limit).offset(offset))
+        return result.scalars().all()
+
+    async def get_item_user(self, organization_id: int, user_id: int, limit: int = 20, offset: int = 0) -> List[Item]:
+        result = await self.db.execute(select(Item).where(Item.organization_id == organization_id).where(Item.user_id == user_id).limit(limit).offset(offset))
+        return result.scalars().all()

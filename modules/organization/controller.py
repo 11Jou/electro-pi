@@ -79,8 +79,8 @@ async def get_items(
     item_service: ItemService = Depends(get_item_service),
 ) -> List[ItemResponse]:
     if membership.role == Role.ADMIN:
-        return await item_service.get_items(organization_id=organization_id, limit=limit, offset=offset)
-    return await item_service.get_items(
+        return await item_service.get_items(organization_id=organization_id, user_id=current_user.id, limit=limit, offset=offset)
+    return await item_service.get_item_user(
         organization_id=organization_id, user_id=current_user.id, limit=limit, offset=offset
     )
 

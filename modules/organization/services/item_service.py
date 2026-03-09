@@ -37,10 +37,25 @@ class ItemService:
         item = await self.item_repository.get_item_by_id(id)
         return ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
 
-    async def get_items(self, organization_id: int, user_id: Optional[int] = None,limit: int = 20, offset: int = 0
-    ) -> List[ItemResponse]:
-        items = await self.item_repository.get_items(
-            organization_id, created_by_user_id=user_id, limit=limit, offset=offset
+
+    async def get_item_user(self, organization_id: int, user_id: int) -> List[ItemResponse]:
+        items = await self.item_repository.get_item_user(organization_id, user_id)
+        await self.audit_service.log_action(
+            organization_id=organization_id,
+            user_id=user_id,
+            action=f"Items fetched for user {user_id} in organization {organization_id}",
+        )
+        return [
+            ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
+            for item in items
+        ]
+
+    async def get_items(self, organization_id: int, user_id: int, limit: int = 20, offset: int = 0) -> List[ItemResponse]:
+        items = await self.item_repository.get_items(organization_id, limit, offset)
+        await self.audit_service.log_action(
+            organization_id=organization_id,
+            user_id=user_id,
+            action=f"Items fetched for organization {organization_id}",
         )
         return [
             ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
