@@ -85,4 +85,15 @@ async def get_items(
     )
 
 
+@router.get("/{organization_id}/audit-logs", response_model=List[AuditLogResponse])
+async def get_audit_logs(
+    organization_id: int,
+    limit: int = Query(10,ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    _: None = Depends(require_org_admin),
+    audit_service: AuditService = Depends(get_audit_service),
+) -> List[AuditLogResponse]:
+    return await audit_service.get_audit_logs(organization_id=organization_id, limit=limit, offset=offset)
+
+
 
