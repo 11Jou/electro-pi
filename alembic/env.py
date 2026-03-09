@@ -5,7 +5,7 @@ from core.database import Base
 
 # Import all models so they register with Base.metadata (required for autogenerate)
 from modules.auth import models as _auth_models  # noqa: F401
-from modules.organiztion import models as _organization_models  # noqa: F401
+from modules.organization import models as _organization_models  # noqa: F401
 
 target_metadata = Base.metadata
 DATABASE_URL = context.config.get_main_option("sqlalchemy.url")

@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException
 from modules.auth.models import User
 from modules.auth.schemas import *
-from modules.auth.repository import IUserRepository, get_user_repository
+from modules.auth.repository import UserRepository, get_user_repository
 from fastapi import Depends
 
 class SecurityService:
@@ -65,7 +65,7 @@ class AuthService:
 
 
 def get_auth_service(
-    user_repository: IUserRepository = Depends(get_user_repository), 
+    user_repository: UserRepository = Depends(get_user_repository), 
     security_service: SecurityService = Depends(get_security_service)
 ) -> AuthService:
     return AuthService(user_repository, security_service)

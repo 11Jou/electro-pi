@@ -19,9 +19,8 @@ class Organization(Base):
 
 class Membership(Base):
     __tablename__ = "memberships"
-    id = Column(Integer, primary_key=True)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, primary_key=True)
     role = Column(SQLAlchemyEnum(Role), nullable=False, default=Role.MEMBER)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
