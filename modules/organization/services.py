@@ -73,3 +73,26 @@ class MembershipService:
         role=membership.role, 
         created_at=membership.created_at, 
         updated_at=membership.updated_at)
+
+    async def get_memberships(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[UserResponse]:
+        memberships = await self.membership_repository.get_memberships(organization_id, limit, offset)
+        return [UserMembershipResponse(
+        id=membership.user_id, 
+        full_name=membership.user.full_name, 
+        email=membership.user.email, 
+        role=membership.role,
+        created_at=membership.user.created_at, 
+        updated_at=membership.user.updated_at) 
+        for membership in memberships]
+
+
+    async def search_memberships(self, organization_id: int, query: str) -> List[UserMembershipResponse]:
+        memberships = await self.membership_repository.search_memberships(organization_id, query)
+        return [UserMembershipResponse(
+        id=membership.user_id, 
+        full_name=membership.user.full_name, 
+        email=membership.user.email, 
+        role=membership.role,
+        created_at=membership.user.created_at, 
+        updated_at=membership.user.updated_at) 
+        for membership in memberships]

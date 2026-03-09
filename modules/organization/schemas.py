@@ -24,3 +24,12 @@ class MembershipResponse(BaseModel):
     role: Role
     created_at: datetime
     updated_at: datetime
+
+
+class UserMembershipResponse(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    role: Role
+    created_at: datetime
+    updated_at: datetime

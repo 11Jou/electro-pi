@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-
+from fastapi import Query
 from modules.organization.schemas import *
 from modules.organization.services import *
 from modules.organization.repository import MembershipRepository, get_membership_repository
@@ -30,3 +30,27 @@ async def create_membership(
     membership_service: MembershipService = Depends(get_membership_service),
 ) -> MembershipResponse:
     return await membership_service.create_membership(organization_id=organization_id, membership=body)
+
+
+
+@router.get("/{organization_id}/users", response_model=List[UserMembershipResponse])
+async def get_memberships(
+    organization_id: int,
+    limit: int = Query(10,ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    _: None = Depends(require_org_admin),
+    membership_service: MembershipService = Depends(get_membership_service),
+) -> List[UserMembershipResponse]:
+    return await membership_service.get_memberships(organization_id=organization_id, limit=limit, offset=offset)
+
+
+
+
+@router.get("/{organization_id}/users/search", response_model=List[UserMembershipResponse])
+async def search_memberships(
+    organization_id: int,
+    query: str,
+    _: None = Depends(require_org_admin),
+    membership_service: MembershipService = Depends(get_membership_service),
+) -> List[UserMembershipResponse]:
+    return await membership_service.search_memberships(organization_id=organization_id, query=query)

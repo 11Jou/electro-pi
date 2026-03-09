@@ -35,4 +35,4 @@ async def require_org_admin(
     if not membership:
         raise HTTPException(status_code=403, detail="Not a member of this organization")
     if membership.role != Role.ADMIN:
-        raise HTTPException(status_code=403, detail="Only organization admins can create memberships")
+        raise HTTPException(status_code=403, detail="Only organization admins can use this endpoint")

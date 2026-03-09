@@ -1,6 +1,7 @@
 from typing import List, Optional
 from core.database import AsyncSession, get_db
 from fastapi import Depends
+from modules.auth.models import User
 from modules.organization.models import Organization, Membership, Role
 from sqlalchemy import select
 
@@ -59,3 +60,20 @@ class MembershipRepository:
             )
         )
         return result.scalars().first()
+
+    async def get_memberships(self, organization_id: int, limit: int = 20, offset: int = 0) -> List[Membership]:
+        result = await self.db.execute(select(Membership)
+        .where(Membership.organization_id == organization_id)
+        .limit(limit)
+        .offset(offset))
+        return result.scalars().all()
+
+
+    async def search_memberships(self, organization_id: int, query: str) -> List[Membership]:
+        result = await self.db.execute(
+            select(Membership)
+            .join(Membership.user)
+            .where(Membership.organization_id == organization_id)
+            .where(User.full_name.ilike(f"%{query}%"))
+        )
+        return result.scalars().all()
