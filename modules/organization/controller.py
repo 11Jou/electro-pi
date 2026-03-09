@@ -19,7 +19,7 @@ async def create_organization(
     current_user: User = Depends(get_current_user),
     organization_service: OrganizationService = Depends(get_organization_service),
 ) -> OrganizationResponse:
-    return await organization_service.create_organization(body, user=current_user)
+    return await organization_service.create_organization(body, user_id=current_user.id)
 
 
 @router.post("/{organization_id}/user", response_model=MembershipResponse)
@@ -56,12 +56,12 @@ async def search_memberships(
     return await membership_service.search_memberships(organization_id=organization_id, query=query)
 
 
-@router.post("/{organization_id}/items", response_model=ItemResponse)
+@router.post("/{organization_id}/item", response_model=ItemResponse)
 async def create_item(
     organization_id: int,
     body: ItemCreate,
     current_user: User = Depends(get_current_user),
-    _: None = Depends(require_org_admin),
+    membership: Membership = Depends(get_org_membership),
     item_service: ItemService = Depends(get_item_service),
 ) -> ItemResponse:
     return await item_service.create_item(
@@ -69,15 +69,20 @@ async def create_item(
     )
 
 
-@router.get("/{organization_id}/items", response_model=List[ItemResponse])
+@router.get("/{organization_id}/item", response_model=List[ItemResponse])
 async def get_items(
     organization_id: int,
+    limit: int = Query(10,ge=1, le=100),
+    offset: int = Query(0, ge=0),
     membership=Depends(get_org_membership),
     current_user: User = Depends(get_current_user),
     item_service: ItemService = Depends(get_item_service),
 ) -> List[ItemResponse]:
     if membership.role == Role.ADMIN:
-        return await item_service.get_items(organization_id=organization_id)
+        return await item_service.get_items(organization_id=organization_id, limit=limit, offset=offset)
     return await item_service.get_items(
-        organization_id=organization_id, user_id=current_user.id
+        organization_id=organization_id, user_id=current_user.id, limit=limit, offset=offset
     )
+
+
+

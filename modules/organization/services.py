@@ -124,10 +124,11 @@ class ItemService:
         return ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
 
     async def get_items(
-        self, organization_id: int, user_id: Optional[int] = None
+        self, organization_id: int, user_id: Optional[int] = None,
+        limit: int = 20, offset: int = 0
     ) -> List[ItemResponse]:
         items = await self.item_repository.get_items(
-            organization_id, created_by_user_id=user_id
+            organization_id, created_by_user_id=user_id, limit=limit, offset=offset
         )
         return [
             ItemResponse(id=item.id, created_at=item.created_at, updated_at=item.updated_at)
