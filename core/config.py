@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
     OPENAI_API_KEY: str = ""
     CHAT_BOT_SERVICE: str = "openai"
-    MOCK: bool = False
+    MOCK: bool = True
 
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),
