@@ -114,7 +114,13 @@ The project ships with a `Dockerfile` and `docker-compose.yml` that:
 - Run PostgreSQL as `db`.
 - Run Alembic migrations automatically before starting the app.
 
-### 4.1 Environment variables for Docker
+### 3.1 Clone the repo
+```bash
+git clone https://github.com/11Jou/electro-pi.git
+cd electro-pi
+```
+
+### 3.2 Environment variables for Docker
 
 Create a `.env` file in the project root. You can copy from `.env.example`:
 
@@ -123,7 +129,7 @@ cp .env.example .env
 ```
 Then Update the OPENAI_API_KEY
 
-### 4.2 Build and start the container
+### 3.3 Build and start the container
 
 ```bash
 docker compose up --build
@@ -139,7 +145,7 @@ The API is available at `http://localhost:8000`.
 
 ---
 
-## 6. Security & Access Control
+## 4. Security & Access Control
 
 - **JWT auth**:
   - `get_current_user` decodes JWT `sub` (email) and loads `User`.
@@ -149,7 +155,7 @@ The API is available at `http://localhost:8000`.
   - `get_org_membership` ensures the caller is at least a member (`ADMIN` or `MEMBER`).
 ---
 
-## 7. Extensibility Notes
+## 5. Extensibility Notes
 
 - To add a new chat provider:
   - Implement `IChatBotService`.
