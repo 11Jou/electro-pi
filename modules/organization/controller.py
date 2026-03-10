@@ -1,13 +1,14 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from modules.organization.schemas import *
 from modules.organization.services import *
 from modules.organization.repository import MembershipRepository, get_membership_repository
 from modules.organization.models import Role, Membership
 from modules.auth.check_auth import get_current_user, require_org_admin, get_org_membership
 from modules.auth.models import User
-
 from modules.auth.services import *
+from utils.factory import get_chat_bot_service
 
 
 router = APIRouter(prefix="/organization", tags=["organization"])
@@ -89,12 +90,33 @@ async def get_items(
 @router.get("/{organization_id}/audit-logs", response_model=List[AuditLogResponse])
 async def get_audit_logs(
     organization_id: int,
-    limit: int = Query(10,ge=1, le=100),
+    limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
     _: None = Depends(require_org_admin),
     audit_service: AuditService = Depends(get_audit_service),
 ) -> List[AuditLogResponse]:
     return await audit_service.get_audit_logs(organization_id=organization_id, limit=limit, offset=offset)
+
+
+@router.post("/{organization_id}/chat")
+async def chat(
+    organization_id: int,
+    body: ChatBotRequest,
+    _: None = Depends(require_org_admin),
+    audit_service: AuditService = Depends(get_audit_service),
+):
+    audit_logs = await audit_service.get_audit_logs(organization_id=organization_id, limit=1000)
+    chat_bot = get_chat_bot_service()
+
+    if body.stream:
+        async def event_stream():
+            async for chunk in chat_bot.stream_response(body.question, audit_logs):
+                yield chunk
+
+        return StreamingResponse(event_stream(), media_type="text/plain")
+
+    answer = await chat_bot.generate_response(body.question, audit_logs)
+    return ChatBotResponse(answer=answer)
 
 
 

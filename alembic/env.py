@@ -1,14 +1,23 @@
-import asyncio
 from alembic import context
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import create_engine
 from core.database import Base
+import os
 
 # Import all models so they register with Base.metadata (required for autogenerate)
 from modules.auth import models as _auth_models  # noqa: F401
 from modules.organization import models as _organization_models  # noqa: F401
 
 target_metadata = Base.metadata
-DATABASE_URL = context.config.get_main_option("sqlalchemy.url")
+
+# Alembic requires a sync driver (psycopg2). Use ALEMBIC_DATABASE_URL if set,
+# otherwise fall back to the app DATABASE_URL but swap asyncpg → psycopg2.
+_raw_url = os.getenv(
+    "ALEMBIC_DATABASE_URL",
+    os.getenv("DATABASE_URL", context.config.get_main_option("sqlalchemy.url")),
+)
+DATABASE_URL = _raw_url.replace("postgresql+asyncpg", "postgresql+psycopg2").replace(
+    "postgresql+aiopg", "postgresql+psycopg2"
+)
 
 def run_migrations_offline():
     """Offline migrations."""
@@ -24,20 +33,12 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    """Online migrations using Async engine."""
-    async def do_run():
-        engine = create_async_engine(DATABASE_URL, poolclass=None)
-
-        async with engine.begin() as conn:
-            # Configure context with sync connection
-            await conn.run_sync(lambda sync_conn: context.configure(
-                connection=sync_conn,
-                target_metadata=target_metadata
-            ))
-            # Run migrations (no connection object passed)
-            await conn.run_sync(lambda sync_conn: context.run_migrations())
-
-    asyncio.run(do_run())
+    """Online migrations using sync engine."""
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        context.configure(connection=conn, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
 
 
 if context.is_offline_mode():

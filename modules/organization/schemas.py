@@ -56,3 +56,12 @@ class AuditLogResponse(BaseModel):
     organization_id: int
     action: str
     created_at: datetime
+
+
+class ChatBotRequest(BaseModel):
+    question: str
+    stream: bool = False
+
+
+class ChatBotResponse(BaseModel):
+    answer: str
